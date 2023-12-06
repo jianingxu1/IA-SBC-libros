@@ -57,7 +57,7 @@
     ?lector <- (object (is-a Lector))
     =>
     (bind ?generos_posibles (create$ narrativa policiaca terror fantasia romantica historica ciencia_ficcion aventura))
-    (bind ?respuesta (pregunta_simple "¿Qué géneros literarios te interesan? " ?generos_posibles))
+    (bind ?respuesta (pregunta_multiple "¿Qué géneros literarios te interesan?" ?generos_posibles))
     (send ?lector put-subgeneros_preferidos ?respuesta)
     (retract ?hecho)
 )
@@ -90,10 +90,14 @@
     (declare (salience 10))
     ?lector <- (object(is-a Lector))
     =>
-    (bind ?genero_escogido (str-cat(send ?lector get-subgeneros_preferidos)))
-    (bind ?*libros* (find-all-instances ((?inst Novela)) (member$ ?genero_escogido ?inst:subgenero)))
+    (bind ?generos_escogidos (send ?lector get-subgeneros_preferidos))
+    (bind ?*libros*
+        (find-all-instances 
+            ((?inst Novela))
+            (tienen_elemento_en_comun ?generos_escogidos ?inst:subgenero)
+        )
+    )
     (bind ?*copia_libros* ?*libros*)
-    (printout t ?*libros* crlf)
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento ""

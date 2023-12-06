@@ -53,7 +53,7 @@
     (slot nivel_de_lectura
         (type STRING)
         (create-accessor read-write))
-    (slot subgeneros_preferidos
+    (multislot subgeneros_preferidos
         (type STRING)
         (create-accessor read-write))
 )

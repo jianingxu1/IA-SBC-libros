@@ -72,3 +72,15 @@
     (printout t crlf)
     ?res
 )
+
+(deffunction MAIN::tienen_elemento_en_comun (?list1 ?list2)
+    (bind ?found FALSE)
+    (foreach ?elem1 ?list1
+        (bind ?el (str-cat ?elem1))
+        (if (member$ ?el ?list2) then
+        (bind ?found TRUE)
+        (break)
+        )
+    )
+    ?found
+)
