@@ -50,35 +50,6 @@
 	(ask subgeneros-favoritos)
     (ask autor-favorito)
 )
-;; -------------------- FUNCIONES
-(deffunction RECOGER_DATOS::hacer_pregunta_simple (?pregunta $?valores-permitidos)
-    ;; Mostrar pregunta y sus opciones
-    (printout t ?pregunta crlf "Introduce uno de los siguientes valores:" crlf)
-    (foreach ?valor ?valores-permitidos
-        (printout t ?valor crlf)
-    )
-
-    ;; Obtener respuesta valida
-    (bind ?esInputCorrecto FALSE)
-    (while (not ?esInputCorrecto) do
-        (bind ?respuesta (read))
-        (if (not (member$ (lowcase ?respuesta) ?valores-permitidos))
-            then
-            (printout t "Valor incorrecto. Vuelve a introducir:" crlf)
-        else
-            (bind ?esInputCorrecto TRUE)
-        )
-    )
-    (printout t crlf)
-    ?respuesta
-)
-
-(deffunction RECOGER_DATOS::hacer_pregunta_simple_sin_restriciones (?pregunta)
-    (printout t ?pregunta crlf)
-    (bind ?respuesta (read))
-    (printout t crlf)
-    ?respuesta
-)
 
 ;; -------------------- REGLAS
 (defrule RECOGER_DATOS::recoger_subgeneros_favoritos "Recoger los subgeneros preferidos del lector"
@@ -86,7 +57,7 @@
     ?lector <- (object (is-a Lector))
     =>
     (bind ?generos_posibles (create$ narrativa policiaca terror fantasia romantica historica ciencia_ficcion aventura))
-    (bind ?respuesta (hacer_pregunta_simple "¿Qué géneros literarios te interesan? " ?generos_posibles))
+    (bind ?respuesta (pregunta_simple "¿Qué géneros literarios te interesan? " ?generos_posibles))
     (send ?lector put-subgeneros_preferidos ?respuesta)
     (retract ?hecho)
 )
@@ -95,7 +66,7 @@
     ?hecho <- (ask autor-favorito)
     ?lector <- (object (is-a Lector))
     =>
-    (bind ?respuesta (hacer_pregunta_simple_sin_restriciones "¿Cuál es tu autor favorito?"))
+    (bind ?respuesta (pregunta_general "¿Cuál es tu autor favorito?"))
     (send ?lector put-autores_favoritos ?respuesta)
     (retract ?hecho)
 )
