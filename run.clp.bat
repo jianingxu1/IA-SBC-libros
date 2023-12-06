@@ -1,0 +1,7 @@
+;;(batch "run.clp.bat")
+(clear)
+(load "ontologia.clp")
+(load "instancias.clp")
+(load "reglas.clp")
+(reset)
+(run)
