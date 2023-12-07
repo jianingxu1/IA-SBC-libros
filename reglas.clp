@@ -56,7 +56,7 @@
     ?hecho <- (ask subgeneros-favoritos)
     ?lector <- (object (is-a Lector))
     =>
-    (bind ?generos_posibles (create$ narrativa policiaca terror fantasia romantica historica ciencia_ficcion aventura))
+    (bind ?generos_posibles (create$ narrativa policiaca terror fantasia romantica historica ciencia_ficcion aventura NO))
     (bind ?respuesta (pregunta_multiple "¿Qué géneros literarios te interesan?" ?generos_posibles))
     (send ?lector put-subgeneros_preferidos ?respuesta)
     (retract ?hecho)
@@ -66,7 +66,7 @@
     ?hecho <- (ask autor-favorito)
     ?lector <- (object (is-a Lector))
     =>
-    (bind ?respuesta (pregunta_general "¿Cuál es tu autor favorito?"))
+    (bind ?respuesta (pregunta_general "¿Cuál es tu autor favorito? (Introduce el nombre entre comillas o \"NO\" en el caso de que no tengas un autor favorito)"))
     (send ?lector put-autores_favoritos ?respuesta)
     (retract ?hecho)
 )
@@ -139,4 +139,3 @@
     (printout t "Estos son los libros que te recomendamos:" crlf)
     (printout t ?*libros* crlf)
 )
-;;
