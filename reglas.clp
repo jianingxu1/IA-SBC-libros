@@ -1,7 +1,7 @@
 ;; VARIABLES GLOBALES
 (defglobal ?*libros* = (create$ ""))
 (defglobal ?*copia_libros* = (create$ "")) ;; en caso de que llegue alguna regla 
-
+(defglobal ?*rango_edad* = (create$ ""))
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
 
@@ -49,6 +49,7 @@
 (deffacts RECOGER_DATOS::hechos_iniciales "Establece hechos para poder recopilar informacion"
 	(ask subgeneros-favoritos)
     (ask autor-favorito)
+    (ask edad-lector)
 )
 
 ;; -------------------- REGLAS
@@ -57,7 +58,7 @@
     ?lector <- (object (is-a Lector))
     =>
     (bind ?generos_posibles (create$ narrativa policiaca terror fantasia romantica historica ciencia_ficcion aventura NO))
-    (bind ?respuesta (pregunta_multiple "¿Qué géneros literarios te interesan?" ?generos_posibles))
+    (bind ?respuesta (pregunta_multiple "¿Que generos literarios te interesan?" ?generos_posibles))
     (send ?lector put-subgeneros_preferidos ?respuesta)
     (retract ?hecho)
 )
@@ -66,17 +67,26 @@
     ?hecho <- (ask autor-favorito)
     ?lector <- (object (is-a Lector))
     =>
-    (bind ?respuesta (pregunta_general "¿Cuál es tu autor favorito? (Introduce el nombre entre comillas o \"NO\" en el caso de que no tengas un autor favorito)"))
+    (bind ?respuesta (pregunta_general "¿Cual es tu autor favorito? (Introduce el nombre entre comillas o \"NO\" en el caso de que no tengas un autor favorito)"))
     (send ?lector put-autores_favoritos ?respuesta)
     (retract ?hecho)
 )
 
-(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el autor favorito"
+(defrule RECOGER_DATOS::recoger_edad_usuario "Recoger la edad del usuario"
+    ?hecho <- (ask edad-lector)
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?respuesta (pregunta_numerica "¿Cual es tu edad? " 0 100))
+    (send ?lector put-edad ?respuesta)
+    (retract ?hecho)
+)
+
+(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el estado animico"
     ?hecho <- (ask estado-animico)
     ?lector <- (object (is-a Lector))
     =>
     (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo NO))
-    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles "(Introduce NO en el caso de que no te importe)"))
+    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles "(Introduce \"NO\" en el caso de que no te importe)"))
     (printout t ?respuesta crlf)
     (send ?lector put-estado_animico_deseado ?respuesta)
 )
@@ -84,13 +94,38 @@
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (not (ask subgeneros-favoritos))
    (not (ask autor-favorito))
+   (not (ask autor-favorito))
    =>
    (printout t "Procesando los datos obtenidos..." crlf)
    (focus ABSTRAER_DATOS)
 )
 
 ;; --------------------- MODULO ABSTRAER_DATOS ---------------------
-(defrule ABSTRAER_DATOS::hola ""
+(defrule ABSTRAER_DATOS::abstraccion_estado_animico "ira relacionado con el subgenero"
+    ?lector <- (object(is-a Lector))
+   =>
+    ;; switch (estado)
+    (focus PROCESAR_DATOS)
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_edad_lector "ira relacionado con publico_dirigido"
+    ?lector <- (object(is-a Lector))
+   =>
+    (bind ?edad_lector (send ?lector get-edad))
+    (switch ?edad_lector
+        (case <= 12 then (send ?lector put-edad ?respuesta))
+    )
+    (focus PROCESAR_DATOS)
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_lugar_lectura "ira relacionado con el formato"
+
+   =>
+    (focus PROCESAR_DATOS)
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_habito_lectura "ira relacionado con la extension y el formato maybe"
+
    =>
     (focus PROCESAR_DATOS)
 )
