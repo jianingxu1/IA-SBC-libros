@@ -139,7 +139,6 @@
     ?hecho <- (filtra_subgenero)
     ?lector <- (object(is-a Lector))
     =>
-
     (bind ?i 1)
     (bind ?aux (create$))
     
@@ -147,14 +146,17 @@
     
     (while (<= ?i (length$ ?*libros*)) do
         (bind ?libro_nth (nth$ ?i ?*libros*))
-        (bind ?var_subgeneros (send ?libro_nth get-subgenero)) 
+        (bind ?var_subgeneros (send ?libro_nth get-subgenero))
         (if (tienen_elemento_en_comun ?generos_escogidos ?var_subgeneros)
             then (bind ?aux (create$ ?aux ?libro_nth)))
         (bind ?i (+ ?i 1))
     )   
     (bind ?*libros* ?aux)
 
-    (bind ?*copia_libros* ?*libros*)
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
     (retract ?hecho)
 )
 
@@ -169,8 +171,7 @@
 
      (if (= (length$ ?instancia_autor_escogido) 0)
           then (printout t "No existe ese autor en la base de datos" crlf)
-          else (printout t ?autor_escogido crlf)
-
+          else
             (bind ?i 1)
             (bind ?aux (create$))
             (while (<= ?i (length$ ?*libros*)) do
@@ -183,14 +184,10 @@
             (bind ?*libros* ?aux)
      )
 
-    ;;Comprobar si tiene 3 o menos
-    (if (< (length$ ?*libros*) 4) 
-        then if (= (length$ ?*libros*) 0) then (bind ?*libros* ?*copia_libros*) 
-                                                (assert (finalizar))
-             else (assert (finalizar))
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
     )
-    (bind ?*copia_libros* ?*libros*)
-
     (retract ?hecho)
 )
 
@@ -203,24 +200,79 @@
     (while (<= ?i (length$ ?*libros*)) do
         (bind ?libro_nth (nth$ ?i ?*libros*))
         (bind ?var_publico_dirigido (send ?libro_nth get-publico_dirigido)) 
-        (if (member$ ?*rango_edad* ?var_publico_dirigido)
+        (if (or (member$ ?*rango_edad* ?var_publico_dirigido) (member$ "para_todos" ?var_publico_dirigido))
             then (bind ?aux (create$ ?aux ?libro_nth)))
         (bind ?i (+ ?i 1))
     )   
     (bind ?*libros* ?aux)
 
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento ""
     (declare (salience -10))
     ?lector <- (object(is-a Lector))
     =>
+    (if (= (length$ ?*libros*) 0) 
+        then (bind ?*libros* ?*copia_libros*) 
+    )
     (focus MOSTRAR_LIBROS)
 )
 
 (defrule MOSTRAR_LIBROS::mostrar_libros ""
     ?lector <- (object(is-a Lector))
     =>
+    
+    (bind ?i 1)
+    (bind ?aux (create$))
+
+    (while (and (<= ?i (length$ ?*libros*)) (< (length$ ?aux) 3)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_valoracion (send ?libro_nth get-valoracion))
+        (if (eq ?var_valoracion "excelente")
+            then (bind ?aux (create$ ?aux ?libro_nth))
+        )
+
+        (bind ?i (+ ?i 1))
+    )
+        
+    (bind ?j 1)
+    (while (and (<= ?j (length$ ?*libros*)) (< (length$ ?aux) 3)) do
+        (bind ?libro_nth (nth$ ?j ?*libros*))
+        (bind ?var_valoracion (send ?libro_nth get-valoracion))
+        (if (eq ?var_valoracion "buena")
+            then (bind ?aux (create$ ?aux ?libro_nth))
+        )
+
+        (bind ?j (+ ?j 1))
+    )
+
+    (bind ?k 1)
+    (while (and (<= ?k (length$ ?*libros*)) (< (length$ ?aux) 3)) do
+        (bind ?libro_nth (nth$ ?k ?*libros*))
+        (bind ?var_valoracion (send ?libro_nth get-valoracion))
+        (if (eq ?var_valoracion "regular")
+            then (bind ?aux (create$ ?aux ?libro_nth))
+        )
+
+        (bind ?k (+ ?k 1))
+    )
+
+    (bind ?z 1)
+    (while (and (<= ?z (length$ ?*libros*)) (< (length$ ?aux) 3)) do
+        (bind ?libro_nth (nth$ ?z ?*libros*))
+        (bind ?var_valoracion (send ?libro_nth get-valoracion))
+        (if (eq ?var_valoracion "deficiente")
+            then (bind ?aux (create$ ?aux ?libro_nth))
+        )
+
+        (bind ?z (+ ?z 1))
+    )
+
+    (bind ?*libros* ?aux)  
     (printout t "Estos son los libros que te recomendamos:" crlf)
     (printout t ?*libros* crlf)
 )
