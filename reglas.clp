@@ -79,13 +79,13 @@
    (focus ABSTRAER_DATOS)
 )
 
-;; MODULO ABSTRAER_DATOS
+;; --------------------- MODULO ABSTRAER_DATOS ---------------------
 (defrule ABSTRAER_DATOS::hola ""
    =>
     (focus PROCESAR_DATOS)
 )
 
-;; MODULO PROCESAR_DATOS
+;; --------------------- MODULO PROCESAR_DATOS ---------------------
 (defrule PROCESAR_DATOS::filtrar_genero "Filtrar los libros por genero"
     (declare (salience 10))
     ?lector <- (object(is-a Lector))
