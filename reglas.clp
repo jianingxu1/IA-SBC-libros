@@ -94,7 +94,7 @@
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (not (ask subgeneros-favoritos))
    (not (ask autor-favorito))
-   (not (ask autor-favorito))
+   (not (ask edad-lector))
    =>
    (printout t "Procesando los datos obtenidos..." crlf)
    (focus ABSTRAER_DATOS)
@@ -104,16 +104,18 @@
 (defrule ABSTRAER_DATOS::abstraccion_estado_animico "ira relacionado con el subgenero"
     ?lector <- (object(is-a Lector))
    =>
-    ;; switch (estado)
-    (focus PROCESAR_DATOS)
 )
 
 (defrule ABSTRAER_DATOS::abstraccion_edad_lector "ira relacionado con publico_dirigido"
     ?lector <- (object(is-a Lector))
    =>
     (bind ?edad_lector (send ?lector get-edad))
-    (switch ?edad_lector
-        (case <= 12 then (send ?lector put-edad ?respuesta))
+    (if (<= ?edad_lector 12) then (bind ?*rango_edad* "infantil")
+     else (if (<= ?edad_lector 18) then (bind ?*rango_edad* "adolescente")
+           else (if (<= ?edad_lector 50) then (bind ?*rango_edad* "adulto")
+                 else  (bind ?*rango_edad* "experimentado")
+                )
+           )
     )
     (focus PROCESAR_DATOS)
 )
@@ -136,10 +138,13 @@
     ?lector <- (object(is-a Lector))
     =>
     (bind ?generos_escogidos (send ?lector get-subgeneros_preferidos))
-    (bind ?*libros*
-        (find-all-instances 
-            ((?inst Novela))
-            (tienen_elemento_en_comun ?generos_escogidos ?inst:subgenero)
+    (if (eq ?generos_escogidos "NO") 
+        then (bind ?*libros* (find-all-instances ((?inst Novela))))
+        else (bind ?*libros*
+             (find-all-instances 
+                ((?inst Novela))
+                (tienen_elemento_en_comun ?generos_escogidos ?inst:subgenero)
+             )
         )
     )
     (bind ?*copia_libros* ?*libros*)
@@ -168,8 +173,24 @@
                (bind ?i (+ ?i 1))
             )   
             (bind ?*libros* ?aux)
-            ;;(printout t ?*libros* crlf)
      )
+)
+
+(defrule PROCESAR_DATOS::filtrar_publico_dirigido "Filtrar los libros por publico_dirigido"
+    (declare (salience 8))
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?autor_libro (send ?libro_nth get-publico_dirigido)) 
+        (if (eq ?*rango_edad (send ?autor_libro get-nombre))
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento ""
