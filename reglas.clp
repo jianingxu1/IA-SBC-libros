@@ -76,7 +76,7 @@
     ?lector <- (object (is-a Lector))
     =>
     (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo NO))
-    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles))
+    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles "(Introduce NO en el caso de que no te importe)"))
     (printout t ?respuesta crlf)
     (send ?lector put-estado_animico_deseado ?respuesta)
 )
