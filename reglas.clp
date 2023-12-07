@@ -139,14 +139,21 @@
     ?hecho <- (filtra_subgenero)
     ?lector <- (object(is-a Lector))
     =>
-    (bind ?generos_escogidos (send ?lector get-subgeneros_preferidos))
 
-    (bind ?*libros*
-        (find-all-instances 
-            ((?inst Novela))
-            (tienen_elemento_en_comun ?generos_escogidos ?inst:subgenero)
-        )
-    )
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (bind ?generos_escogidos (send ?lector get-subgeneros_preferidos))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_subgeneros (send ?libro_nth get-subgenero)) 
+        (if (tienen_elemento_en_comun ?generos_escogidos ?var_subgeneros)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
     (bind ?*copia_libros* ?*libros*)
     (retract ?hecho)
 )
@@ -175,25 +182,34 @@
             )   
             (bind ?*libros* ?aux)
      )
+
+    ;;Comprobar si tiene 3 o menos
+    (if (< (length$ ?*libros*) 4) 
+        then if (= (length$ ?*libros*) 0) then (bind ?*libros* ?*copia_libros*) 
+                                                (assert (finalizar))
+             else (assert (finalizar))
+    )
+    (bind ?*copia_libros* ?*libros*)
+
     (retract ?hecho)
 )
 
-;;(defrule PROCESAR_DATOS::filtrar_publico_dirigido "Filtrar los libros por publico_dirigido"
-;;    (declare (salience 8))
-;;    ?lector <- (object(is-a Lector))
-;;    =>
-;;    (bind ?i 1)
-;;    (bind ?aux (create$))
-;;    (while (<= ?i (length$ ?*libros*)) do
-;;        (bind ?libro_nth (nth$ ?i ?*libros*))
-;;        (bind ?autor_libro (send ?libro_nth get-publico_dirigido)) 
-;;        (if (eq ?*rango_edad (send ?autor_libro get-nombre))
-;;            then (bind ?aux (create$ ?aux ?libro_nth)))
-;;        (bind ?i (+ ?i 1))
-;;    )   
-;;    (bind ?*libros* ?aux)
-;;
-;;)
+(defrule PROCESAR_DATOS::filtrar_publico_dirigido "Filtrar los libros por publico_dirigido"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_publico_dirigido (send ?libro_nth get-publico_dirigido)) 
+        (if (member$ ?*rango_edad* ?var_publico_dirigido)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+)
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento ""
     (declare (salience -10))
