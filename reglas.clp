@@ -100,6 +100,33 @@
     (bind ?*copia_libros* ?*libros*)
 )
 
+(defrule PROCESAR_DATOS::filtrar_autor "Filtrar los libros por autor"
+    (declare (salience 9))
+    ?lector <- (object(is-a Lector))
+    =>
+     (bind ?autor_escogido (str-cat(send ?lector get-autores_favoritos)))
+     
+     ;;Buscamos la instancia de Escritor cuyo nombre es ?autor_escogido
+     (bind ?instancia_autor_escogido (find-instance ((?inst Escritor)) (eq ?autor_escogido ?inst:nombre)))
+
+     (if (= (length$ ?instancia_autor_escogido) 0)
+          then (printout t "No existe ese autor en la base de datos" crlf)
+          else (printout t ?autor_escogido crlf)
+
+            (bind ?i 1)
+            (bind ?aux (create$))
+            (while (<= ?i (length$ ?*libros*)) do
+               (bind ?libro_nth (nth$ ?i ?*libros*))
+               (bind ?autor_libro (send ?libro_nth get-escrito_por)) 
+               (if (eq ?autor_escogido (send ?autor_libro get-nombre))
+                   then (bind ?aux (create$ ?aux ?libro_nth)))
+               (bind ?i (+ ?i 1))
+            )   
+            (bind ?*libros* ?aux)
+            ;;(printout t ?*libros* crlf)
+     )
+)
+
 (defrule PROCESAR_DATOS::finalizar_procesamiento ""
     ?lector <- (object(is-a Lector))
     =>
