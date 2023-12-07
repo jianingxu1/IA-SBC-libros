@@ -71,6 +71,16 @@
     (retract ?hecho)
 )
 
+(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el autor favorito"
+    ?hecho <- (ask estado-animico)
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo NO))
+    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles))
+    (printout t ?respuesta crlf)
+    (send ?lector put-estado_animico_deseado ?respuesta)
+)
+
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (not (ask subgeneros-favoritos))
    (not (ask autor-favorito))
