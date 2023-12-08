@@ -1,9 +1,32 @@
-En este prototipo inicial, lo hemos dividido en:
-    - funciones.clp: que contiene todas las funciones
-    - instancias.clp: que contiene todas las instancias
-    - ontologia.clp: que contiene las distintas clases de la ontologia
-    - reglas.clp: que contiene todas las reglas organizadas en módulos
-    - run.clp.bat: que es el batch que hay que cargar para ejecutar el prototipo
+Para este prototipo hemos implementado un formato de diálogo en el que vamos haciendo
+preguntas al usuario y mediante las respuestas que nos da, vamos filtrando entre 
+nuestras instancias para devolver aquellas novelas cuyos atributos cumplan con los
+deseos del usuario.
 
-Para este prototipo hemos implementado un formato de dialogo en el que vamos haciendo preguntas al usuario i mediante las respuetas que nos da el usuario, vamos filtrando entre nuestras instancias para devolver aquellas novelas cuyos atributos cumplan con los deseos del usuario.
+Este prototipo inicial, lo hemos dividido en:
+    - funciones.clp: contiene todas las funciones
+    - instancias.clp: contiene todas las instancias
+    - ontologia.clp: contiene las distintas clases de la ontologia
+    - reglas.clp: contiene todas las reglas organizadas en módulos
+    - run.clp.bat: es el batch que hay que cargar para ejecutar el prototipo
 
+Primero se ejecuta el módulo de RECOGER DATOS en el que se hacen las preguntas al
+usuario:
+El formato de diálogo pregunta si el usuario tiene algún género favorito, si es que sí,
+preguntamos cúales son, la respuesta se espera en una única línia separando los géneros
+por espacios.
+Despues se pregunta por si el usuario tiene algún autor favorito, si es que sí,
+preguntamos cúal es, el nombre del autor debe ir entre comillas.
+Finalmente preguntamos por la edad del usuario que debe ser un número entre 0 y 100, y
+en función de la edad recomendamos novelas dirigidas para el publico al que pertenece
+el usuario.
+
+A continuación, en el caso de la edad se requiere pasar por el modulo de ABSTRACION DE 
+DATOS ya que necesitamos abstraer la edad que nos da.
+
+Una vez hechas las preguntas y hechas las abstarcciones necesarias, empieza el proceso 
+de filtraje mediante el módulo PROCESAR DATOS el cúal se encarga de recomendar novelas
+que cumplan con lo que pide el usuario con un máximo de 3 novelas ordenadas por su valoracion,
+o en su defecto, se recomiendan aquellas que cumplan con el máximo de requisitos que desea
+el usuario y finalmente en el módulo de MOSTRAR LIBROS se encarga de imprimir las novelas
+que se recomiendan al usuario.

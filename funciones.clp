@@ -27,8 +27,8 @@
 )
 
 (deffunction MAIN::pregunta_si_o_no (?pregunta)
-    (bind ?respuesta (pregunta_simple ?pregunta si no s n))
-    (if (or (eq (lowcase ?respuesta) si) (eq (lowcase ?respuesta) s))
+    (bind ?respuesta (pregunta_simple ?pregunta si no))
+    (if (eq (lowcase ?respuesta) si)
         then TRUE
         else FALSE
     )

@@ -212,7 +212,7 @@
     )
 )
 
-(defrule PROCESAR_DATOS::finalizar_procesamiento ""
+(defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"
     (declare (salience -10))
     ?lector <- (object(is-a Lector))
     =>
@@ -222,7 +222,7 @@
     (focus MOSTRAR_LIBROS)
 )
 
-(defrule MOSTRAR_LIBROS::mostrar_libros ""
+(defrule MOSTRAR_LIBROS::mostrar_libros "Funcion que muestra los libros recomendados"
     ?lector <- (object(is-a Lector))
     =>
     
