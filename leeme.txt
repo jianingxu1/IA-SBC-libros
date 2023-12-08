@@ -1,32 +1,36 @@
-Para este prototipo hemos implementado un formato de diálogo en el que vamos haciendo
-preguntas al usuario y mediante las respuestas que nos da, vamos filtrando entre 
-nuestras instancias para devolver aquellas novelas cuyos atributos cumplan con los
-deseos del usuario.
+Para este prototipo, hemos implementado un formato de diálogo en el que
+realizamos preguntas al usuario acerca de sus características y preferencias
+como lector. A continuación, utilizando las respuestas proporcionadas por el
+usuario, filtramos entre nuestras novelas aquellas que mejor se ajusten a sus
+preferencias.
 
-Este prototipo inicial, lo hemos dividido en:
-    - funciones.clp: contiene todas las funciones
-    - instancias.clp: contiene todas las instancias
-    - ontologia.clp: contiene las distintas clases de la ontologia
-    - reglas.clp: contiene todas las reglas organizadas en módulos
-    - run.clp.bat: es el batch que hay que cargar para ejecutar el prototipo
+Este prototipo inicial se divide en los siguientes componentes:
+- funciones.clp: contiene todas las funciones necesarias.
+- instancias.clp: incluye todas las instancias relevantes.
+- ontologia.clp: define las diferentes clases de la ontología utilizada.
+- reglas.clp: organiza todas las reglas en módulos.
+- run.clp.bat: es el archivo batch que hay que cargar para ejecutar el prototipo.
 
-Primero se ejecuta el módulo de RECOGER DATOS en el que se hacen las preguntas al
-usuario:
-El formato de diálogo pregunta si el usuario tiene algún género favorito, si es que sí,
-preguntamos cúales son, la respuesta se espera en una única línia separando los géneros
-por espacios.
-Despues se pregunta por si el usuario tiene algún autor favorito, si es que sí,
-preguntamos cúal es, el nombre del autor debe ir entre comillas.
-Finalmente preguntamos por la edad del usuario que debe ser un número entre 0 y 100, y
-en función de la edad recomendamos novelas dirigidas para el publico al que pertenece
-el usuario.
+El proceso comienza ejecutando el módulo de "RECOGER DE DATOS", donde
+hacemos las siguientes preguntas al usuario:
+- En formato de diálogo, preguntamos si el usuario tiene algún género
+literario favorito. Si es así, solicitamos que los enumere separados por
+espacios en una única línea.
+- Luego, indagamos sobre si el usuario tiene algún autor preferido, en caso
+afirmativo, pedimos el nombre del autor entre comillas.
+- Finalmente, consultamos la edad del usuario, la cual debe ser un número entre
+0 y 100. En función de la edad proporcionada, recomendamos novelas dirigidas al
+público correspondiente.
 
-A continuación, en el caso de la edad se requiere pasar por el modulo de ABSTRACION DE 
-DATOS ya que necesitamos abstraer la edad que nos da.
+A continuación, se realiza una abstracción de datos en su debido modulo. Eso
+ocurre con la edad, que la abstraemos convirtiendola al atributo publico_dirigido.
 
-Una vez hechas las preguntas y hechas las abstarcciones necesarias, empieza el proceso 
-de filtraje mediante el módulo PROCESAR DATOS el cúal se encarga de recomendar novelas
-que cumplan con lo que pide el usuario con un máximo de 3 novelas ordenadas por su valoracion,
-o en su defecto, se recomiendan aquellas que cumplan con el máximo de requisitos que desea
-el usuario y finalmente en el módulo de MOSTRAR LIBROS se encarga de imprimir las novelas
-que se recomiendan al usuario.
+Después de completar las preguntas y realizar las abstracciones necesarias,
+iniciamos el proceso de filtrado a través del módulo "PROCESAR DATOS".
+Este módulo se encarga de recomendar novelas que se ajusten a las preferencias
+del usuario, mostrando un máximo de 3 novelas ordenadas por su valoración. En
+caso de no encontrar novelas que cumplan con todas las preferencias, se
+recomendarán aquellas que satisfazcan la mayoría de los requisitos.
+
+Finalmente, en el módulo "MOSTRAR LIBROS", se imprimen las novelas recomendadas
+al usuario.
