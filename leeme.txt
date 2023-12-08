@@ -1,0 +1,9 @@
+En este prototipo inicial, lo hemos dividido en:
+    - funciones.clp: que contiene todas las funciones
+    - instancias.clp: que contiene todas las instancias
+    - ontologia.clp: que contiene las distintas clases de la ontologia
+    - reglas.clp: que contiene todas las reglas organizadas en módulos
+    - run.clp.bat: que es el batch que hay que cargar para ejecutar el prototipo
+
+Para este prototipo hemos implementado un formato de dialogo en el que vamos haciendo preguntas al usuario i mediante las respuetas que nos da el usuario, vamos filtrando entre nuestras instancias para devolver aquellas novelas cuyos atributos cumplan con los deseos del usuario.
+
