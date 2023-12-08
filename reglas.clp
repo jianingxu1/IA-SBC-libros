@@ -42,6 +42,7 @@
    =>
    (make-instance Usuario of Lector)
    (printout t "-*-*-*-*-*-*-* Bienvenido al recomendador de libros! -*-*-*-*-*-*-*" crlf)
+   (printout t "A continuación vamos a realizarte unas preguntas para recomendarte" crlf "que más se ajusten a tu perfil!" crlf crlf)
    (focus RECOGER_DATOS)
 )
 
