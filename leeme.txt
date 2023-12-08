@@ -34,3 +34,8 @@ recomendarán aquellas que satisfazcan la mayoría de los requisitos.
 
 Finalmente, en el módulo "MOSTRAR LIBROS", se imprimen las novelas recomendadas
 al usuario.
+
+Ejemplo de INPUT para cada opción:
+- Cuando pregunte por género si hay favorito(se pueden poner varios): fantasia ciencia_ficcion narrativa
+- Cuando pregunte por autor si hay favorito(entre comillas y solo 1): "Miguel de cervantes"
+- Cuando pregunte por edad: 20
