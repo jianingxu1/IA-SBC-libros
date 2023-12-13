@@ -118,23 +118,12 @@
     )
 )
 
-
-
 (defrule RECOGER_DATOS::recoger_horas_lectura_semanales "Recoger las horas de lectura semanales"
     ?lector <- (object (is-a Lector))
     =>
     (bind ?respuesta (pregunta_numerica "¿Aproximadamente cuántas horas lees a la semana? " 0 168))
     (send ?lector put-horas_lectura_semanales ?respuesta)
 )
-
-;;(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el estado animico"
-;;    ?lector <- (object (is-a Lector))
-;;    =>
-;;    (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo NO))
-;;    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles "(Introduce \"NO\" en el caso de que no te importe)"))
-;;    (printout t ?respuesta crlf)
-;;    (send ?lector put-estado_animico_deseado ?respuesta)
-;;)
 
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (declare (salience -10))
@@ -156,18 +145,6 @@
            )
     )
 )
-
-;;(defrule ABSTRAER_DATOS::abstraccion_lugar_lectura "ira relacionado con el formato"
-;;
-;;   =>
-;;    (focus PROCESAR_DATOS)
-;;)
-;;
-;;(defrule ABSTRAER_DATOS::abstraccion_habito_lectura "ira relacionado con la extension y el formato maybe"
-;;
-;;   =>
-;;    (focus PROCESAR_DATOS)
-;;)
 
 (defrule ABSTRAER_DATOS::finalizar_abstraccion ""
     (declare (salience -10))
