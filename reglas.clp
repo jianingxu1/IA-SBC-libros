@@ -2,6 +2,7 @@
 (defglobal ?*libros* = (create$ ""))
 (defglobal ?*copia_libros* = (create$ ""))
 (defglobal ?*rango_edad* = (create$ ""))
+(defglobal ?*subgeneros_estado_animico* = (create$ ""))
 
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
@@ -79,6 +80,18 @@
     (send ?lector put-edad ?respuesta)
 )
 
+(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el estado animico del usuario"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?quiere_responder (pregunta_si_o_no "¿Quieres que el libro te haga sentir relajado, intrigado, emocionado o reflexivo?"))
+    (if ?quiere_responder
+        then
+        (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo))
+        (bind ?respuesta (pregunta_simple "Indique la opcion escogida por favor: " ?estados_animicos_posibles))
+        (send ?lector put-estado_animico_deseado ?respuesta)
+    )
+)
+
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (declare (salience -10))
    =>
@@ -95,6 +108,19 @@
      else (if (<= ?edad_lector 18) then (bind ?*rango_edad* "adolescente")
            else (if (<= ?edad_lector 50) then (bind ?*rango_edad* "adulto")
                  else  (bind ?*rango_edad* "experimentado")
+                )
+           )
+    )
+)
+
+(defrule ABSTRAER_DATOS:abstraccion_estado_animico "ira relacionado con subgenero"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?estado_animico_lector (send ?lector get-estado_animico_deseado))
+    (if (eq ?estado_animico_lector "relajado") then (bind ?*subgeneros_estado_animico* "narrativa" "historica")
+     else (if (eq ?estado_animico_lector "intrigado") then (bind ?*subgeneros_estado_animico* "policiaca" "aventura" "ciencia_ficcion")
+           else (if (eq ?estado_animico_lector "emocionado") then (bind ?*subgeneros_estado_animico* "romantica" "fantasia" "aventura")
+                 else  (bind ?*subgeneros_estado_animico* "historica" "terror" "policiaca")
                 )
            )
     )
@@ -191,6 +217,28 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
     )
+)
+
+(defrule PROCESAR_DATOS::filtrar_estado_animico "Filtrar los libros por estado animico deseado"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_subgeneros (send ?libro_nth get-subgenero))
+        (if (tienen_elemento_en_comun ?*subgeneros_estado_animico* ?var_subgeneros)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"
