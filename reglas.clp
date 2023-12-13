@@ -3,6 +3,8 @@
 (defglobal ?*copia_libros* = (create$ ""))
 (defglobal ?*rango_edad* = (create$ ""))
 (defglobal ?*subgeneros_estado_animico* = (create$ ""))
+(defglobal ?*habito_de_lectura* = (create$ ""))
+(defglobal ?*nivel_de_lectura* = (create$ ""))
 
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
@@ -92,6 +94,13 @@
     )
 )
 
+(defrule RECOGER_DATOS::recoger_horas_lectura_semanales "Recoger las horas de lectura semanales"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?respuesta (pregunta_numerica "¿Aproximadamente cuántas horas lees a la semana? " 0 168))
+    (send ?lector put-horas_lectura_semanales ?respuesta)
+)
+
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (declare (salience -10))
    =>
@@ -108,6 +117,85 @@
      else (if (<= ?edad_lector 18) then (bind ?*rango_edad* "adolescente")
            else (if (<= ?edad_lector 50) then (bind ?*rango_edad* "adulto")
                  else  (bind ?*rango_edad* "experimentado")
+                )
+           )
+    )
+    (assert (abstraccion_edad))
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_habito_lectura "Obtener habito lectura a partir de horas semanales de lectura"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?horas_lectura_semanales (send ?lector get-horas_lectura_semanales))
+    (if (<= ?horas_lectura_semanales 1)
+        then (bind ?*habito_de_lectura* "principiante")
+    else
+        (if (<= ?horas_lectura_semanales 4)
+            then (bind ?*habito_de_lectura* "intermedio")
+        else
+            (bind ?*habito_de_lectura* "avanzado")
+        )
+    )
+    (assert (abstraccion_habito_de_lectura))
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_nivel_lectura "Obtener nivel de lectura a partir habito de lectura y edad"
+    ?lector <- (object(is-a Lector))
+    (abstraccion_edad)
+    (abstraccion_habito_de_lectura)
+    =>
+    (if (eq ?*habito_de_lectura* "avanzado")
+        then (bind ?*nivel_de_lectura* "avanzado")
+    else
+        (if (or (eq ?*habito_de_lectura* "intermedio") (or (eq ?*rango_edad* "adulto") (eq ?*rango_edad* "experimentado")))
+            then (bind ?*nivel_de_lectura* "intermedio")
+        else
+            (bind ?*nivel_de_lectura* "principiante")
+        )
+    )
+    (assert (abstraccion_edad))
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_habito_lectura "Obtener habito lectura a partir de horas semanales de lectura"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?horas_lectura_semanales (send ?lector get-horas_lectura_semanales))
+    (if (<= ?horas_lectura_semanales 1)
+        then (bind ?*habito_de_lectura* "principiante")
+    else
+        (if (<= ?horas_lectura_semanales 4)
+            then (bind ?*habito_de_lectura* "intermedio")
+        else
+            (bind ?*habito_de_lectura* "avanzado")
+        )
+    )
+    (assert (abstraccion_habito_de_lectura))
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_nivel_lectura "Obtener nivel de lectura a partir habito de lectura y edad"
+    ?lector <- (object(is-a Lector))
+    (abstraccion_edad)
+    (abstraccion_habito_de_lectura)
+    =>
+    (if (eq ?*habito_de_lectura* "avanzado")
+        then (bind ?*nivel_de_lectura* "avanzado")
+    else
+        (if (or (eq ?*habito_de_lectura* "intermedio") (or (eq ?*rango_edad* "adulto") (eq ?*rango_edad* "experimentado")))
+            then (bind ?*nivel_de_lectura* "intermedio")
+        else
+            (bind ?*nivel_de_lectura* "principiante")
+        )
+    )
+)
+
+(defrule ABSTRAER_DATOS:abstraccion_estado_animico "ira relacionado con subgenero"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?estado_animico_lector (send ?lector get-estado_animico_deseado))
+    (if (eq ?estado_animico_lector "relajado") then (bind ?*subgeneros_estado_animico* "narrativa" "historica")
+     else (if (eq ?estado_animico_lector "intrigado") then (bind ?*subgeneros_estado_animico* "policiaca" "aventura" "ciencia_ficcion")
+           else (if (eq ?estado_animico_lector "emocionado") then (bind ?*subgeneros_estado_animico* "romantica" "fantasia" "aventura")
+                 else  (bind ?*subgeneros_estado_animico* "historica" "terror" "policiaca")
                 )
            )
     )
@@ -239,6 +327,39 @@
         then (bind ?*copia_libros* ?*libros*) 
     )
 
+)
+
+(defrule PROCESAR_DATOS::filtrar_extension "Filtrar los libros por extension relacionado con nivel de lectura"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    (switch ?*nivel_de_lectura*
+        (case "principiante" then
+            (bind ?extension_deseada "corta")
+            (printout t "switch" crlf)
+        )
+        (case "intermedio" then
+            (bind ?extension_deseada "media")
+        )
+        (case "avanzado" then (bind ?extension_deseada "larga"))
+        (default (bind ?extension_deseada "larga"))
+    )
+
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_extension (send ?libro_nth get-extension)) 
+        (if (eq ?extension_deseada ?var_extension)
+            then (bind ?aux (create$ ?aux ?libro_nth))
+        )
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"

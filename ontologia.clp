@@ -41,7 +41,7 @@
     (multislot formato_preferido
         (type STRING)
         (create-accessor read-write))
-    (slot habito_lectura
+    (slot horas_lectura_semanales
         (type STRING)
         (create-accessor read-write))
     (multislot idiomas_preferidos
