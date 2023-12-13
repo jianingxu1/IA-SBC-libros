@@ -38,7 +38,7 @@
     (slot estado_animico_deseado
         (type STRING)
         (create-accessor read-write))
-    (multislot formato_preferido
+    (multislot formatos_preferidos
         (type STRING)
         (create-accessor read-write))
     (slot horas_lectura_semanales
@@ -47,7 +47,7 @@
     (multislot idiomas_preferidos
         (type STRING)
         (create-accessor read-write))
-    (slot lugares_lectura
+    (slot lugar_lectura
         (type STRING)
         (create-accessor read-write))
     (slot nivel_de_lectura

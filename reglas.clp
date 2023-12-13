@@ -5,6 +5,7 @@
 (defglobal ?*subgeneros_estado_animico* = (create$ ""))
 (defglobal ?*habito_de_lectura* = (create$ ""))
 (defglobal ?*nivel_de_lectura* = (create$ ""))
+(defglobal ?*formato_lectura* = (create$ ""))
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
 
@@ -117,6 +118,7 @@
         (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo))
         (bind ?respuesta (pregunta_simple "Indique la opcion escogida por favor: " ?estados_animicos_posibles))
         (send ?lector put-estado_animico_deseado ?respuesta)
+        (assert (recoger_estado_animo))
     )
     (retract ?hecho)
 )
@@ -127,6 +129,33 @@
     (bind ?respuesta (pregunta_numerica "¿Aproximadamente cuántas horas lees a la semana? " 0 168))
     (send ?lector put-horas_lectura_semanales ?respuesta)
 )
+
+(defrule RECOGER_DATOS::recoger_formatos_favoritos "Recoger los formatos de libro favoritos"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?quiere_responder (pregunta_si_o_no "¿Tienes algun formato de libro favorito?"))
+    (if ?quiere_responder
+        then
+        (bind ?formatos_posibles (create$ formato_digital texto audiolibro texto_imagenes))
+        (bind ?respuesta (pregunta_multiple "¿Que formatos te interesan?" ?formatos_posibles))
+        (send ?lector put-formatos_preferidos ?respuesta)
+        (assert (filtra_formato))
+        
+        else (assert (pregunta_lugar_lectura))
+    )
+)
+
+(defrule RECOGER_DATOS::recoger_lugar_lectura "Recoger los formatos de libro favoritos"
+    ?hecho <- (pregunta_lugar_lectura)
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?lugares_posibles (create$ metro casa cafeteria naturaleza avion biblioteca autobus))
+    (bind ?respuesta (pregunta_simple "¿En que lugares vas a leer?" ?lugares_posibles))
+    (send ?lector put-lugar_lectura ?respuesta)
+    (retract ?hecho)
+    (assert (recoger_lugar))
+)
+
 
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (declare (salience -10))
@@ -148,6 +177,28 @@
            )
     )
     (assert (abstraccion_edad))
+)
+
+(defrule ABSTRAER_DATOS::abstraccion_lugar_lectura " "
+    ?hecho <- (recoger_lugar)
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?lugar_lector (send ?lector get-lugar_lectura))
+    (if (eq ?lugar_lector "metro") then (bind ?*formato_lectura* "audiolibro" "formato_digital")
+     else (if (eq ?lugar_lector "casa") then (bind ?*formato_lectura* "texto")
+           else (if (eq ?lugar_lector "cafeteria") then (bind ?*formato_lectura* "texto" "texto_imagenes") ;;en una cafeteria hay ruido y las imagenes ayudan
+                 else (if (eq ?lugar_lector "naturaleza") then (bind ?*formato_lectura* "texto" "formato_digital") ;;digital para que no se moje el papel del libro
+                       else (if (eq ?lugar_lector "avion") then (bind ?*formato_lectura* "audiolibro") ;; vas apretado y es mejor escuchar ya que no peudes tener una postura de lectura comoda
+                             else (if (eq ?lugar_lector "biblioteca") then (bind ?*formato_lectura* "texto")
+                                   else (bind ?*formato_lectura* "audiolibro" "formato_digital") ;;autobus
+                             )
+                       )
+                 )
+           )
+     )
+    )
+    (retract ?hecho)
+    (assert (abstraccion_lugar_lectura))
 )
 
 (defrule ABSTRAER_DATOS::abstraccion_habito_lectura "Obtener habito lectura a partir de horas semanales de lectura"
@@ -184,6 +235,7 @@
 )
 
 (defrule ABSTRAER_DATOS:abstraccion_estado_animico "ira relacionado con subgenero"
+    ?hecho <- (recoger_estado_animo)
     ?lector <- (object(is-a Lector))
     =>
     (bind ?estado_animico_lector (send ?lector get-estado_animico_deseado))
@@ -194,6 +246,8 @@
                 )
            )
     )
+    (assert (abstraccion_estado_animo))
+    (retract ?hecho)
 )
 
 (defrule ABSTRAER_DATOS::finalizar_abstraccion ""
@@ -289,7 +343,7 @@
 )
 
 (defrule PROCESAR_DATOS::filtrar_estado_animico "Filtrar los libros por estado animico deseado"
-    ?hecho <- (filtra_estado_animico)
+    ?hecho <- (abstraccion_estado_animo)
     ?lector <- (object(is-a Lector))
     =>
     (bind ?i 1)
@@ -400,6 +454,59 @@
     (retract ?hecho)
 )
 
+;;1 => muchos
+(defrule PROCESAR_DATOS::filtrar_formato "Filtrar los libros por formato"
+    ?hecho <- (filtra_formato)
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (bind ?formatos_escogidos (send ?lector get-formatos_preferidos))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_formatos (send ?libro_nth get-formato_libro))
+        (if (tienen_elemento_en_comun ?formatos_escogidos ?var_formatos)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+    (retract ?hecho)
+)
+
+;;muchos formatos => muchosformato
+(defrule PROCESAR_DATOS::filtrar_lugar_lectura "Filtrar los libros por lugar de lectura"
+    ?hecho <- (abstraccion_lugar_lectura)
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_formatos (send ?libro_nth get-formato_libro))
+        (if (tienen_elemento_en_comun ?*formato_lectura* ?var_formatos)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )
+
+    (bind ?*libros* ?aux)
+    ;(printout t ?*libros* crlf)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+    (retract ?hecho)
+
+    (printout t "Lugar de lectura" ?*libros* crlf)
+)
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"
     (declare (salience -10))
