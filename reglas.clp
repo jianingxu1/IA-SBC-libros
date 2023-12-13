@@ -273,7 +273,6 @@
     =>
     (bind ?i 1)
     (bind ?aux (create$))
-    
     (while (<= ?i (length$ ?*libros*)) do
         (bind ?libro_nth (nth$ ?i ?*libros*))
         (bind ?var_publico_dirigido (send ?libro_nth get-publico_dirigido)) 
@@ -281,7 +280,8 @@
             then (bind ?aux (create$ ?aux ?libro_nth)))
         (bind ?i (+ ?i 1))
     )   
-
+    (bind ?*libros* ?aux)
+    ;(printout t ?*libros* crlf)
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
@@ -289,6 +289,7 @@
 )
 
 (defrule PROCESAR_DATOS::filtrar_estado_animico "Filtrar los libros por estado animico deseado"
+    ?hecho <- (filtra_estado_animico)
     ?lector <- (object(is-a Lector))
     =>
     (bind ?i 1)
@@ -300,14 +301,16 @@
         (if (tienen_elemento_en_comun ?*subgeneros_estado_animico* ?var_subgeneros)
             then (bind ?aux (create$ ?aux ?libro_nth)))
         (bind ?i (+ ?i 1))
-    )   
+    )
+
     (bind ?*libros* ?aux)
+    ;(printout t ?*libros* crlf)
 
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
     )
-
+    (retract ?hecho)
 )
 
 (defrule PROCESAR_DATOS::filtrar_extension "Filtrar los libros por extension relacionado con nivel de lectura"
@@ -333,8 +336,9 @@
             then (bind ?aux (create$ ?aux ?libro_nth))
         )
         (bind ?i (+ ?i 1))
-    )   
+    ) 
     (bind ?*libros* ?aux)
+    ;;(printout t ?*libros* crlf)
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
