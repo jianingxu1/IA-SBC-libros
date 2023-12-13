@@ -1,8 +1,7 @@
 ;; VARIABLES GLOBALES
 (defglobal ?*libros* = (create$ ""))
-(defglobal ?*copia_libros* = (create$ ""))
+(defglobal ?*copia_libros* = (create$ "")) ;; en caso de que llegue alguna regla 
 (defglobal ?*rango_edad* = (create$ ""))
-
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
 
@@ -41,8 +40,7 @@
    (declare (salience 10))
    =>
    (make-instance Usuario of Lector)
-   (printout t "-*-*-*-*-*-*-* Bienvenido al recomendador de novelas! -*-*-*-*-*-*-*" crlf)
-   (printout t "A continuación vamos a realizarte unas preguntas para recomendarte" crlf "las novelas que más se ajusten a tu perfil!" crlf crlf)
+   (printout t "-*-*-*-*-*-*-* Bienvenido al recomendador de libros! -*-*-*-*-*-*-*" crlf)
    (focus RECOGER_DATOS)
 )
 
@@ -50,13 +48,26 @@
 (defrule RECOGER_DATOS::recoger_subgeneros_favoritos "Recoger los subgeneros preferidos del lector"
     ?lector <- (object (is-a Lector))
     =>
-    (bind ?quiere_responder (pregunta_si_o_no "¿Hay algún género literario que te interese?"))
+    (bind ?quiere_responder (pregunta_si_o_no "¿Hay algun genero literario que te interese?"))
     (if ?quiere_responder
         then
         (bind ?generos_posibles (create$ narrativa policiaca terror fantasia romantica historica ciencia_ficcion aventura))
-        (bind ?respuesta (pregunta_multiple "¿Que géneros literarios te interesan?" ?generos_posibles))
+        (bind ?respuesta (pregunta_multiple "¿Que genero/s literario/s te interesan?" ?generos_posibles))
         (send ?lector put-subgeneros_preferidos ?respuesta)
         (assert (filtra_subgenero))
+    )
+)
+
+(defrule RECOGER_DATOS::recoger_epocas_favoritas "Recoger las epocas favoritas del lector"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?quiere_responder (pregunta_si_o_no "¿Hay alguna epoca sobre la que te gustaria leer?"))
+    (if ?quiere_responder
+        then
+        (bind ?epocas_posibles (create$ prehistoria edad_antigua edad_media edad_moderna edad_contemporanea))
+        (bind ?respuesta (pregunta_multiple "¿Que epocas te interesan?" ?epocas_posibles))
+        (send ?lector put-epocas_preferidas ?respuesta)
+        (assert (filtra_epoca))
     )
 )
 
@@ -75,9 +86,18 @@
 (defrule RECOGER_DATOS::recoger_edad_usuario "Recoger la edad del usuario"
     ?lector <- (object (is-a Lector))
     =>
-    (bind ?respuesta (pregunta_numerica "¿Cual es tu edad? " 0 100))
+    (bind ?respuesta (pregunta_numerica "¿Cual es tu edad? " 5 100))
     (send ?lector put-edad ?respuesta)
 )
+
+;;(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el estado animico"
+;;    ?lector <- (object (is-a Lector))
+;;    =>
+;;    (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo NO))
+;;    (bind ?respuesta (hacer-pregunta-simple "Quieres que el libro te haga sentir: " ?estados_animicos_posibles "(Introduce \"NO\" en el caso de que no te importe)"))
+;;    (printout t ?respuesta crlf)
+;;    (send ?lector put-estado_animico_deseado ?respuesta)
+;;)
 
 (defrule RECOGER_DATOS::finalizar_recogida "Finaliza la recogida de informacion"
    (declare (salience -10))
@@ -99,6 +119,18 @@
            )
     )
 )
+
+;;(defrule ABSTRAER_DATOS::abstraccion_lugar_lectura "ira relacionado con el formato"
+;;
+;;   =>
+;;    (focus PROCESAR_DATOS)
+;;)
+;;
+;;(defrule ABSTRAER_DATOS::abstraccion_habito_lectura "ira relacionado con la extension y el formato maybe"
+;;
+;;   =>
+;;    (focus PROCESAR_DATOS)
+;;)
 
 (defrule ABSTRAER_DATOS::finalizar_abstraccion ""
     (declare (salience -10))
@@ -191,6 +223,36 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
     )
+)
+
+(defrule PROCESAR_DATOS::filtrar_epoca "Filtrar los libros por epoca"
+    ?hecho <- (filtra_epoca)
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    (bind ?epocas_escogidas (send ?lector get-epocas_preferidas))
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))   
+        (bind ?var_epoca (send ?libro_nth get-epoca))
+
+        (bind ?j 1)
+        (while (<= ?j (length$ ?epocas_escogidas)) do
+            (bind ?epoca_nth (nth$ ?j ?epocas_escogidas))
+            (if (eq (str-cat ?epoca_nth) (str-cat ?var_epoca))
+                then (bind ?aux (create$ ?aux ?libro_nth))
+            )
+            (bind ?j (+ ?j 1))
+        )
+        (bind ?i (+ ?i 1))        
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+    (retract ?hecho)
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"
