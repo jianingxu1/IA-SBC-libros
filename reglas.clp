@@ -74,6 +74,19 @@
     )
 )
 
+(defrule RECOGER_DATOS::recoger_idiomas "Recoger los idiomas en los que quiere leer el lector"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?quiere_responder (pregunta_si_o_no "¿Hay algun idioma en especifico que quieras?"))
+    (if ?quiere_responder
+        then
+        (bind ?idiomas_posibles (create$ universal castellano ingles frances aleman chino))
+        (bind ?respuesta (pregunta_multiple "¿Que idiomas te interesan?" ?idiomas_posibles))
+        (send ?lector put-idiomas_preferidos ?respuesta)
+        (assert (filtra_idioma))
+    )
+)
+
 (defrule RECOGER_DATOS::recoger_autor_favorito "Recoger el autor favorito"
     ?lector <- (object (is-a Lector))
     =>
@@ -104,6 +117,8 @@
         (send ?lector put-estado_animico_deseado ?respuesta)
     )
 )
+
+
 
 (defrule RECOGER_DATOS::recoger_horas_lectura_semanales "Recoger las horas de lectura semanales"
     ?lector <- (object (is-a Lector))
@@ -331,6 +346,32 @@
     )
     (retract ?hecho)
 )
+
+(defrule PROCESAR_DATOS::filtrar_idioma "Filtrar los libros por idioma"
+    ?hecho <- (filtra_idioma)
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (bind ?idiomas_escogidos (send ?lector get-idiomas_preferidos))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_idiomas (send ?libro_nth get-idiomas))
+        (if (tienen_elemento_en_comun ?idiomas_escogidos ?var_idiomas)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+    (retract ?hecho)
+)
+
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"
     (declare (salience -10))
