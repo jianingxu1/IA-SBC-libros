@@ -2,6 +2,9 @@
 (defglobal ?*libros* = (create$ ""))
 (defglobal ?*copia_libros* = (create$ "")) ;; en caso de que llegue alguna regla 
 (defglobal ?*rango_edad* = (create$ ""))
+(defglobal ?*subgeneros_estado_animico* = (create$ ""))
+(defglobal ?*habito_de_lectura* = (create$ ""))
+(defglobal ?*nivel_de_lectura* = (create$ ""))
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
 
@@ -88,6 +91,25 @@
     =>
     (bind ?respuesta (pregunta_numerica "¿Cual es tu edad? " 5 100))
     (send ?lector put-edad ?respuesta)
+)
+
+(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el estado animico del usuario"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?quiere_responder (pregunta_si_o_no "¿Quieres que el libro te haga sentir relajado, intrigado, emocionado o reflexivo?"))
+    (if ?quiere_responder
+        then
+        (bind ?estados_animicos_posibles (create$ relajado intrigado emocionado reflexivo))
+        (bind ?respuesta (pregunta_simple "Indique la opcion escogida por favor: " ?estados_animicos_posibles))
+        (send ?lector put-estado_animico_deseado ?respuesta)
+    )
+)
+
+(defrule RECOGER_DATOS::recoger_horas_lectura_semanales "Recoger las horas de lectura semanales"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?respuesta (pregunta_numerica "¿Aproximadamente cuántas horas lees a la semana? " 0 168))
+    (send ?lector put-horas_lectura_semanales ?respuesta)
 )
 
 ;;(defrule RECOGER_DATOS::recoger_estado_animico "Recoger el estado animico"
@@ -215,6 +237,61 @@
         (bind ?var_publico_dirigido (send ?libro_nth get-publico_dirigido)) 
         (if (or (member$ ?*rango_edad* ?var_publico_dirigido) (member$ "para_todos" ?var_publico_dirigido))
             then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+)
+
+(defrule PROCESAR_DATOS::filtrar_estado_animico "Filtrar los libros por estado animico deseado"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_subgeneros (send ?libro_nth get-subgenero))
+        (if (tienen_elemento_en_comun ?*subgeneros_estado_animico* ?var_subgeneros)
+            then (bind ?aux (create$ ?aux ?libro_nth)))
+        (bind ?i (+ ?i 1))
+    )   
+    (bind ?*libros* ?aux)
+
+    ;; Si libros se queda en 0, no modificar copia_libros
+    (if (not (= (length$ ?*libros*) 0)) 
+        then (bind ?*copia_libros* ?*libros*) 
+    )
+
+)
+
+(defrule PROCESAR_DATOS::filtrar_extension "Filtrar los libros por extension relacionado con nivel de lectura"
+    ?lector <- (object(is-a Lector))
+    =>
+    (bind ?i 1)
+    (bind ?aux (create$))
+    (switch ?*nivel_de_lectura*
+        (case "principiante" then
+            (bind ?extension_deseada "corta")
+            (printout t "switch" crlf)
+        )
+        (case "intermedio" then
+            (bind ?extension_deseada "media")
+        )
+        (case "avanzado" then (bind ?extension_deseada "larga"))
+        (default (bind ?extension_deseada "larga"))
+    )
+
+    (while (<= ?i (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?i ?*libros*))
+        (bind ?var_extension (send ?libro_nth get-extension)) 
+        (if (eq ?extension_deseada ?var_extension)
+            then (bind ?aux (create$ ?aux ?libro_nth))
+        )
         (bind ?i (+ ?i 1))
     )   
     (bind ?*libros* ?aux)
