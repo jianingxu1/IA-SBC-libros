@@ -26,7 +26,7 @@
     (multislot se_le_recomienda
         (type INSTANCE)
         (create-accessor read-write))
-    (slot autores_favoritos
+    (slot autor_favorito
         (type STRING)
         (create-accessor read-write))
     (slot edad
@@ -42,7 +42,7 @@
         (type STRING)
         (create-accessor read-write))
     (slot horas_lectura_semanales
-        (type STRING)
+        (type STRING) ;;si lo cambiamos a INTEGER sigue funcionando todo el codigo?
         (create-accessor read-write))
     (multislot idiomas_preferidos
         (type STRING)

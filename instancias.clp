@@ -1121,7 +1121,7 @@
          (ha_escrito  [Las_sombras_del_pasado])
          (año_de_nacimiento  1992)
          (fama  "no_conocido")
-         (nacionalidad  "no_conocido")
+         (nacionalidad  "europeo")
          (nombre  "Elena Díaz"))
 
     ([Luis_Mendoza] of Escritor
@@ -1142,7 +1142,7 @@
          (ha_escrito  [El_secreto_del_bosque])
          (año_de_nacimiento  1990)
          (fama  "no_conocido")
-         (nacionalidad  "no_conocido")
+         (nacionalidad  "europeo")
          (nombre  "Isabel Martínez"))
 
     ([Maria_Gomez] of Escritor

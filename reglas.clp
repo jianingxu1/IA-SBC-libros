@@ -96,7 +96,7 @@
     (if ?quiere_responder
         then
         (bind ?respuesta (pregunta_general "¿Cual es tu autor favorito? (Introduce el nombre entre comillas)"))
-        (send ?lector put-autores_favoritos ?respuesta)
+        (send ?lector put-autor_favorito ?respuesta)
         (assert (filtra_autor))
     )
 )
@@ -295,7 +295,7 @@
     ?hecho <- (filtra_autor)
     ?lector <- (object(is-a Lector))
     =>
-     (bind ?autor_escogido (str-cat(send ?lector get-autores_favoritos)))
+     (bind ?autor_escogido (str-cat(send ?lector get-autor_favorito)))
      
      ;;Buscamos la instancia de Escritor cuyo nombre es ?autor_escogido
      (bind ?instancia_autor_escogido (find-instance ((?inst Escritor)) (eq ?autor_escogido ?inst:nombre)))
