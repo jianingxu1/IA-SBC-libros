@@ -192,7 +192,7 @@
     ?hecho <- (recoger_lugar)
     ?lector <- (object(is-a Lector))
     =>
-    (bind ?lugar_lector (send ?lector get-lugar_lectura))
+    (bind ?lugar_lector (str-cat (send ?lector get-lugar_lectura)))
     (if (eq ?lugar_lector "metro") then (bind ?*formato_lectura* "audiolibro" "formato_digital")
      else (if (eq ?lugar_lector "casa") then (bind ?*formato_lectura* "texto")
            else (if (eq ?lugar_lector "cafeteria") then (bind ?*formato_lectura* "texto" "texto_imagenes") ;;en una cafeteria hay ruido y las imagenes ayudan
@@ -206,6 +206,7 @@
            )
      )
     )
+    (printout t ?*formato_lectura* crlf)
     (retract ?hecho)
     (assert (abstraccion_lugar_lectura))
 )
@@ -526,7 +527,7 @@
     (while (<= ?i (length$ ?*libros*)) do
         (bind ?libro_nth (nth$ ?i ?*libros*))
         (bind ?var_formatos (send ?libro_nth get-formato_libro))
-        (if (tienen_elemento_en_comun ?*formato_lectura* ?var_formatos)
+        (if (member$ ?*formato_lectura* ?var_formatos)
             then (bind ?aux (create$ ?aux ?libro_nth)))
         (bind ?i (+ ?i 1))
     )
