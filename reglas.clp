@@ -1,11 +1,11 @@
 ;; VARIABLES GLOBALES
 (defglobal ?*libros* = (create$ ""))
 (defglobal ?*copia_libros* = (create$ "")) ;; en caso de que llegue alguna regla 
-(defglobal ?*rango_edad* = (create$ ""))
-(defglobal ?*subgeneros_estado_animico* = (create$ ""))
-(defglobal ?*habito_de_lectura* = (create$ ""))
-(defglobal ?*nivel_de_lectura* = (create$ ""))
-(defglobal ?*formato_lectura* = (create$ ""))
+(defglobal ?*rango_edad* = (create$))
+(defglobal ?*subgeneros_estado_animico* = (create$))
+(defglobal ?*habito_de_lectura* = (create$))
+(defglobal ?*nivel_de_lectura* = (create$))
+(defglobal ?*formato_lectura* = (create$))
 (defglobal ?*datos_utilizados* = (create$))
 
 ;; MODULOS
@@ -247,13 +247,22 @@
     ?hecho <- (recoger_estado_animo)
     ?lector <- (object(is-a Lector))
     =>
-    (bind ?estado_animico_lector (send ?lector get-estado_animico_deseado))
-    (if (eq ?estado_animico_lector "relajado") then (bind ?*subgeneros_estado_animico* "narrativa" "historica")
-     else (if (eq ?estado_animico_lector "intrigado") then (bind ?*subgeneros_estado_animico* "policiaca" "aventura" "ciencia_ficcion")
-           else (if (eq ?estado_animico_lector "emocionado") then (bind ?*subgeneros_estado_animico* "romantica" "fantasia" "aventura")
-                 else  (bind ?*subgeneros_estado_animico* "historica" "terror" "policiaca")
-                )
-           )
+
+    (bind ?estado_animico_lector (str-cat (send ?lector get-estado_animico_deseado)))
+    (switch ?estado_animico_lector
+        (case "relajado" then
+            (bind ?*subgeneros_estado_animico* "narrativa" "historica")
+        )
+        (case "intrigado" then
+            (bind ?*subgeneros_estado_animico* "policiaca" "aventura" "ciencia_ficcion")
+        )
+        (case "emocionado" then
+            (bind ?*subgeneros_estado_animico* "romantica" "fantasia" "aventura")
+        )
+        (case "reflexivo" then
+            (bind ?*subgeneros_estado_animico* "historica" "terror" "policiaca")
+        )
+        (default (bind ?*subgeneros_estado_animico* "narrativa" "historica" "policiaca" "aventura" "ciencia_ficcion" "terror"))
     )
     (assert (abstraccion_estado_animo))
     (retract ?hecho)
