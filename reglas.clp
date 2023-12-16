@@ -49,6 +49,13 @@
 )
 
 ;; --------------------- MODULO RECOGER_DATOS ---------------------
+(defrule RECOGER_DATOS::recoger_nombre "Recoger el nombre del usuario"
+    ?lector <- (object (is-a Lector))
+    =>
+    (bind ?respuesta (pregunta_general "¿Cómo te llamas?"))
+    (assert (nombre ?respuesta))
+)
+
 (defrule RECOGER_DATOS::recoger_subgeneros_favoritos "Recoger los subgeneros preferidos del lector"
     ?lector <- (object (is-a Lector))
     =>
@@ -504,8 +511,6 @@
         then (bind ?*copia_libros* ?*libros*) 
     )
     (retract ?hecho)
-
-    (printout t "Lugar de lectura" ?*libros* crlf)
 )
 
 (defrule PROCESAR_DATOS::finalizar_procesamiento "Funcion que finaliza el procesado"
@@ -520,11 +525,12 @@
 
 (defrule MOSTRAR_LIBROS::mostrar_libros "Funcion que muestra los libros recomendados"
     ?lector <- (object(is-a Lector))
+    ?fact <- (nombre ?value)
     =>
-    
     (bind ?i 1)
     (bind ?aux (create$))
 
+    ;; Obtenemos los libros con más valoración
     (while (and (<= ?i (length$ ?*libros*)) (< (length$ ?aux) 3)) do
         (bind ?libro_nth (nth$ ?i ?*libros*))
         (bind ?var_valoracion (send ?libro_nth get-valoracion))
@@ -568,7 +574,8 @@
         (bind ?z (+ ?z 1))
     )
 
-    (bind ?*libros* ?aux)  
-    (printout t "Estos son los libros que te recomendamos:" crlf)
+    (bind ?*libros* ?aux)
+
+    (printout t ?value ", estos son los libros que te recomendamos:" crlf)
     (printout t ?*libros* crlf)
 )
