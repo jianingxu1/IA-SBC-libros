@@ -1,11 +1,11 @@
 ;; VARIABLES GLOBALES
-(defglobal ?*libros* = (create$))
-(defglobal ?*copia_libros* = (create$)) ;; en caso de que llegue alguna regla 
-(defglobal ?*rango_edad* = (create$))
-(defglobal ?*subgeneros_estado_animico* = (create$))
-(defglobal ?*habito_de_lectura* = (create$))
-(defglobal ?*nivel_de_lectura* = (create$))
-(defglobal ?*formato_lectura* = (create$))
+(defglobal ?*libros* = (create$ ""))
+(defglobal ?*copia_libros* = (create$ "")) ;; en caso de que llegue alguna regla 
+(defglobal ?*rango_edad* = (create$ ""))
+(defglobal ?*subgeneros_estado_animico* = (create$ ""))
+(defglobal ?*habito_de_lectura* = (create$ ""))
+(defglobal ?*nivel_de_lectura* = (create$ ""))
+(defglobal ?*formato_lectura* = (create$ ""))
 (defglobal ?*datos_utilizados* = (create$))
 
 ;; MODULOS
@@ -297,9 +297,7 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
         (bind ?dato "subgeneros")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -332,9 +330,7 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*)
         (bind ?dato "autor")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -356,10 +352,8 @@
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*)
-        (bind ?dato "edad")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?dato "edad -> publico dirigido")
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
 )
 
@@ -384,10 +378,8 @@
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*)
-        (bind ?dato "estados animicos")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?dato "estados animicos -> subgeneros")
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -422,14 +414,8 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then
         (bind ?*copia_libros* ?*libros*)
-        (bind ?dato "edad")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
-        (bind ?dato "horas de lectura semanales")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?dato "edad y horas de lectura semanales -> extension")
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
 )
 
@@ -460,9 +446,7 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*)
         (bind ?dato "epocas")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -489,9 +473,7 @@
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
         (bind ?dato "idiomas")
-        (if (not (member$ ?dato ?*datos_utilizados*))
-        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
-        )
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -518,6 +500,8 @@
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
+        (bind ?dato "formato")
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -544,6 +528,8 @@
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
+        (bind ?dato "lugar de lectura -> formato")
+        (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
     )
     (retract ?hecho)
 )
@@ -613,5 +599,21 @@
 
     (printout t crlf ?value ", estos son los libros que te recomendamos:" crlf)
     (printout t (implode$ ?*libros*) crlf crlf)
-    (printout t "Se han elegido estos libros ya que son los que más se adecúan a tu perfil." crlf "Concretamente, hemos utilizado estos datos: " (implode$ ?*datos_utilizados*) crlf)
+    (bind ?k 1)
+
+    ;; Imprimimos la informacion de cada libro recomendado
+    (while (<= ?k (length$ ?*libros*)) do
+        (bind ?libro_nth (nth$ ?k ?*libros*))
+        (imprimir_libro ?libro_nth)
+        (bind ?k (+ ?k 1))
+    )
+
+    ;; Imprimimos los datos utilizados para la recomendacion
+    (printout t "Se han elegido estos libros ya que son los que más se adecúan a tu perfil." crlf)
+    (printout t "Concretamente, hemos utilizado estos datos:" crlf)
+    (progn$
+        (?dato ?*datos_utilizados*)
+        (printout t " - " ?dato crlf)
+        (bind ?k (+ ?k 1))
+    )
 )
