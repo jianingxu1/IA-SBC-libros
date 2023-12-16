@@ -1,11 +1,13 @@
 ;; VARIABLES GLOBALES
-(defglobal ?*libros* = (create$ ""))
-(defglobal ?*copia_libros* = (create$ "")) ;; en caso de que llegue alguna regla 
-(defglobal ?*rango_edad* = (create$ ""))
-(defglobal ?*subgeneros_estado_animico* = (create$ ""))
-(defglobal ?*habito_de_lectura* = (create$ ""))
-(defglobal ?*nivel_de_lectura* = (create$ ""))
-(defglobal ?*formato_lectura* = (create$ ""))
+(defglobal ?*libros* = (create$))
+(defglobal ?*copia_libros* = (create$)) ;; en caso de que llegue alguna regla 
+(defglobal ?*rango_edad* = (create$))
+(defglobal ?*subgeneros_estado_animico* = (create$))
+(defglobal ?*habito_de_lectura* = (create$))
+(defglobal ?*nivel_de_lectura* = (create$))
+(defglobal ?*formato_lectura* = (create$))
+(defglobal ?*datos_utilizados* = (create$))
+
 ;; MODULOS
 (defmodule MAIN (export ?ALL))
 
@@ -294,6 +296,10 @@
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
+        (bind ?dato "subgeneros")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
     (retract ?hecho)
 )
@@ -324,7 +330,11 @@
 
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
-        then (bind ?*copia_libros* ?*libros*) 
+        then (bind ?*copia_libros* ?*libros*)
+        (bind ?dato "autor")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
     (retract ?hecho)
 )
@@ -345,7 +355,11 @@
     ;(printout t ?*libros* crlf)
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
-        then (bind ?*copia_libros* ?*libros*) 
+        then (bind ?*copia_libros* ?*libros*)
+        (bind ?dato "edad")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
 )
 
@@ -369,7 +383,11 @@
 
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
-        then (bind ?*copia_libros* ?*libros*) 
+        then (bind ?*copia_libros* ?*libros*)
+        (bind ?dato "estados animicos")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
     (retract ?hecho)
 )
@@ -402,7 +420,16 @@
     ;;(printout t ?*libros* crlf)
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
-        then (bind ?*copia_libros* ?*libros*) 
+        then
+        (bind ?*copia_libros* ?*libros*)
+        (bind ?dato "edad")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
+        (bind ?dato "horas de lectura semanales")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
 )
 
@@ -431,7 +458,11 @@
 
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
-        then (bind ?*copia_libros* ?*libros*) 
+        then (bind ?*copia_libros* ?*libros*)
+        (bind ?dato "epocas")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
     (retract ?hecho)
 )
@@ -457,6 +488,10 @@
     ;; Si libros se queda en 0, no modificar copia_libros
     (if (not (= (length$ ?*libros*) 0)) 
         then (bind ?*copia_libros* ?*libros*) 
+        (bind ?dato "idiomas")
+        (if (not (member$ ?dato ?*datos_utilizados*))
+        then (bind ?*datos_utilizados* (create$ ?*datos_utilizados* ?dato))
+        )
     )
     (retract ?hecho)
 )
@@ -576,6 +611,7 @@
 
     (bind ?*libros* ?aux)
 
-    (printout t ?value ", estos son los libros que te recomendamos:" crlf)
-    (printout t ?*libros* crlf)
+    (printout t crlf ?value ", estos son los libros que te recomendamos:" crlf)
+    (printout t (implode$ ?*libros*) crlf crlf)
+    (printout t "Se han elegido estos libros ya que son los que más se adecúan a tu perfil." crlf "Concretamente, hemos utilizado estos datos: " (implode$ ?*datos_utilizados*) crlf)
 )
