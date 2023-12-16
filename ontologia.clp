@@ -42,7 +42,7 @@
         (type STRING)
         (create-accessor read-write))
     (slot horas_lectura_semanales
-        (type STRING) ;;si lo cambiamos a INTEGER sigue funcionando todo el codigo?
+        (type INTEGER)
         (create-accessor read-write))
     (multislot idiomas_preferidos
         (type STRING)
