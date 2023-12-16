@@ -102,6 +102,6 @@
     (printout t " - Extension: " ?extension crlf)
     (printout t " - Idiomas: " ?idiomas crlf)
     (printout t " - Publico dirigido: " ?publico_dirigido crlf)
-    (printout t " - Autor: " ?autor crlf crlf)
+    (printout t " - Autor: " ?autor crlf)
     (printout t " - Valoracion: " ?valoracion crlf crlf)
 )
