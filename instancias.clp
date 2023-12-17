@@ -346,7 +346,7 @@
          (epoca  "prehistoria")
          (exito  "libro_no_exitoso")
          (extension  "larga")
-         (formato_libro  "audiolibro" "formato_digital")
+         (formato_libro "texto" "audiolibro" "formato_digital")
          (idiomas  "ingles" "aleman")
          (publico_dirigido  "infantil")
          (subgenero  "aventura" "historica")
@@ -463,7 +463,7 @@
          (epoca  "prehistoria")
          (exito  "libro_no_exitoso")
          (extension  "larga")
-         (formato_libro  "audiolibro" "formato_digital")
+         (formato_libro  "texto" "audiolibro" "formato_digital")
          (idiomas  "ingles")
          (publico_dirigido  "infantil")
          (subgenero  "aventura" "historica")
@@ -1171,7 +1171,7 @@
          (año_de_nacimiento  1995)
          (fama  "emergente")
          (nacionalidad  "europeo")
-         (nombre  "Carlos Díaz"))
+         (nombre  "Carlos Diaz"))
 
     ([Ana_Ruiz] of Escritor
          (ha_escrito  [El_susurro_del_espacio] [El_susurro_del_espacio_perdido])
